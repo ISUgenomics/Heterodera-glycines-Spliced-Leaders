@@ -491,47 +491,61 @@ bedtools intersect -wo -a SLGenesFixed.gff3 -b <(awk '$3=="gene"' ../../../Baum/
 
 #20kb bins may be more appropriate, as the ratio of sl gene/distance is increased.  (12 scaffold_16 700000)
 ```
-### Venn Diagram for promiscuously spliced trans-spliced leaders#
-I need to find the count for the each SL that had a read with a 5' spliced leader, mapping to the 5' end of transcripts
+### Venn Diagram for promiscuously spliced trans-spliced leaders
+I need to find the count for the each SL that had a read with a 5' spliced leader, mapping to the 5' end of transcripts -- 20 ESTs with spliced leaders did not have a corresponding transcript, so they were added to the venn diagram subsequently.
 ```
-cat EST2TrinityTranscripts.list SLReadsInTranscripts.list <(awk '{print $2}' transcriptCt.list) |sort|uniq|wc
-   2596    2596   41413
+/work/GIF/remkv6/SplicedLeaders/21_ReadMappingToTranscripts/01_BLAST
+cat ../../05_EST/EST2TrinityTranscripts.list transcriptCt.list <(less ../../17_SL2Transcripts/SL2Transcriptsv2Filtered.blast.out |awk '{print $2}' |sed 's/_/\t/2' |awk '{print $1}' |sort|uniq)|sort|uniq|wc
+   2532    2532   40402
+
 
 #Total to direct blast
-wc SLReadsInTranscripts.list
- 2076  2076 33120 SLReadsInTranscripts.list
+less ../../17_SL2Transcripts/SL2Transcriptsv2Filtered.blast.out |awk '{print $2}' |sed 's/_/\t/2' |awk '{print $1}' |sort|uniq|wc
+   2076    2076   33120
 
 #Total to the read oriented blast
-wc <(awk '{print $2}' transcriptCt.list)
-   1539    1539   24578
+wc transcriptCt.list
+ 1635  1635 26111 transcriptCt.list
+
 #Total to the ESTs
    wc EST2TrinityTranscripts.list
- 342  342 5457 EST2TrinityTranscripts.list
+ 187  187 2992 EST2TrinityTranscripts.list
 
 
 #Unique to the direct blast
-cat <(awk '{print $2}' transcriptCt.list) EST2TrinityTranscripts.list |sort|uniq |grep -w -v -f - SLReadsInTranscripts.list |wc
-    827     827   13170
+cat ../../05_EST/EST2TrinityTranscripts.list transcriptCt.list |grep -w -v -f - <(less ../../17_SL2Transcripts/SL2Transcriptsv2Filtered.blast.out |awk '{print $2}' |sed 's/_/\t/2' |awk '{print $1}' |sort|uniq) |wc
+    785     785   12499
+
 #Unique to the read oriented analysis
-cat SLReadsInTranscripts.list EST2TrinityTranscripts.list |sort|uniq |grep -w -v -f - <(awk '{print $2}' transcriptCt.list) |wc
-    292     292    4660
+cat ../../05_EST/EST2TrinityTranscripts.list  <(less ../../17_SL2Transcripts/SL2Transcriptsv2Filtered.blast.out |awk '{print $2}' |sed 's/_/\t/2' |awk '{print $1}' |sort|uniq)  |grep -w -v -f - transcriptCt.list |wc
+    343     343    5474
+
 #what is unique to the EST'samples
-cat SLReadsInTranscripts.list <(awk '{print $2}' transcriptCt.list)  |sort|uniq |grep -w -v -f - EST2TrinityTranscripts.list |wc
-    210     210    3345
+cat <(less ../../17_SL2Transcripts/SL2Transcriptsv2Filtered.blast.out |awk '{print $2}' |sed 's/_/\t/2' |awk '{print $1}' |sort|uniq) transcriptCt.list |grep -w -v -f - ../../05_EST/EST2TrinityTranscripts.list|wc
+    102     102    1632
+
+
 
 #what is shared between reads and direct blast
-cat  SLReadsInTranscripts.list <(awk '{print $2}' transcriptCt.list)  |sort|uniq -c|awk '$1==2' |wc
-   1229    2458   29462
+cat <(less ../../17_SL2Transcripts/SL2Transcriptsv2Filtered.blast.out |awk '{print $2}' |sed 's/_/\t/2' |awk '{print $1}' |sort|uniq) transcriptCt.list |sort|uniq -c|awk '$1==2' |wc
+   1281    2562   30709
+
 #what is shared between reads and ESTs
-cat  EST2TrinityTranscripts.list <(awk '{print $2}' transcriptCt.list)  |sort|uniq -c|awk '$1==2' |wc
-    112     224    2688
+cat transcriptCt.list ../../05_EST/EST2TrinityTranscripts.list |sort|uniq -c|awk '$1==2' |wc
+     75     150    1800
+
+
 #What is shared between the direct blast and ESTs
-cat  EST2TrinityTranscripts.list SLReadsInTranscripts.list  |sort|uniq -c|awk '$1==2' |wc
-    114     228    2736
+cat <(less ../../17_SL2Transcripts/SL2Transcriptsv2Filtered.blast.out |awk '{print $2}' |sed 's/_/\t/2' |awk '{print $1}' |sort|uniq) ../../05_EST/EST2TrinityTranscripts.list |sort|uniq -c|awk '$1==2' |wc
+     74     148    1776
+
+
 
 #found in all three samples   
-cat EST2TrinityTranscripts.list SLReadsInTranscripts.list <(awk '{print $2}' transcriptCt.list) |sort|uniq -c|awk '$1==3' |wc
-     94     188    2256
+cat ../../05_EST/EST2TrinityTranscripts.list <(less ../../17_SL2Transcripts/SL2Transcriptsv2Filtered.blast.out |awk '{print $2}' |sed 's/_/\t/2' |awk '{print $1}' |sort|uniq) transcriptCt.list |sort|uniq -c|awk '$1==3' |wc
+     64     128    1536
+
+
 ```
 
 ### Promiscuity analysis to see how often each transcript receives a different spliced leader
