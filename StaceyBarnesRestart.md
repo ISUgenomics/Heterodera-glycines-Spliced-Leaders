@@ -350,6 +350,30 @@ less ../../../Baum/CamTechGenomeComparison/58_Renamatorium/18_effectorRedo/4Seba
 1 GLAND4
 1 GLAND8
 ################
+
+#what is the distrubtion of SLs to effector genes?
+bedtools intersect -wo -a  <(awk '$3=="exon"' SLnematode_transcripts_Trinity.gff)  -b <(awk '$3=="exon"' ../../../Baum/CamTechGenomeComparison/32_genePredictionComp/MergeIsoseqRnsaseq/braker/genome738sl.polished.mitoFixed1/augustus.gff3 ) |cut -f 9,20 |sed 's/ID=//g' |sed 's/\./\t/1' |cut -f 1,3|sed 's/\./\t/2' |sed 's/;/\t/g' |grep -w "exon1" |cut -f 1,2 |grep -w -f <(less SLGenesExon1.list |grep -w -f - ../../../Baum/CamTechGenomeComparison/58_Renamatorium/18_effectorRedo/121EffectorOldNewGeneNames.list |awk '{print $1}' ) - >Transcript2GeneEffector.list
+
+#get old names attached to new names
+paste Transcript2GeneEffector.list <(less Transcript2GeneEffector.list |awk '{print $2}' |sed 's/\./\t/g' |awk '{print $1}' |while read line; do grep -w "$line" ../../../Baum/CamTechGenomeComparison/58_Renamatorium/18_effectorRedo/121EffectorOldNewGeneNames.list ;done ) |tr " " "\t" >Transcript2OldGenes2NewGenes.list
+
+#made list of comma separated effectors with unique names
+vi UniqueEffectorNewGenes.list
+
+#get new gene names attached to effector names
+awk '{print $4}' Transcript2OldGenes2NewGenes.list |while read line; do grep -w "$line" UniqueEffectorNewGenes.list ; done |paste Transcript2OldGenes2NewGenes.list - >Transcript2Oldgenes2NewGenees2Effectors.list
+
+#attach reads and SLs to above list.   
+less Transcript2Oldgenes2NewGenees2Effectors.list |awk '{print $1}' |sed 's/_/\t/2' |awk '{print $1}' |while read line; do grep -w "$line" ../../02_SLAlignment/ImperfectPromiscuityOutput ; done |awk '{print $1,$4}' |sort |uniq -c |sort -k3,3V |less
+
+#made transcripts unique and added SLs comma delimited after.
+vi SL2TranscriptEffector.list
+
+#added spliced leaders from transcripts to genes to effectors manually in notepad due to duplication of transcritp names assocaited with multiple genes
+### Used SL2TranscriptEffector.list and output of below to combine into a list
+sed 's/_/\t/2' Transcript2Oldgenes2NewGenees2Effectors.list |cut -f 1,6- |uniq
+#add transcript direct blast effector/SL counts.
+less ../21_ReadMappingToTranscrsed 's/_/\t/2' |cut -f 1,2 |uniq|sort|uniq |less
 ```
 
 ### Locational genomic clustering of genes giving rise to trans-spliced transcripts
